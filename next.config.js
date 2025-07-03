@@ -1,6 +1,6 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  output: 'standalone'
+  // Remove output config for Vercel
 }
 
 module.exports = nextConfig
