@@ -1,6 +1,5 @@
 import { NextResponse } from 'next/server'
 import OpenAI from 'openai'
-import pdf from 'pdf-parse'
 import { createServerSupabaseClient } from '@/lib/supabase-server'
 
 // Initialize OpenAI
@@ -49,6 +48,8 @@ const labReferenceRanges = {
 
 async function parseLabPDF(buffer) {
   try {
+    // Dynamically import pdf-parse to avoid build issues
+    const pdf = (await import('pdf-parse')).default
     const data = await pdf(buffer)
     return data.text
   } catch (error) {
