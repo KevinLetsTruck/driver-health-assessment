@@ -2,11 +2,6 @@ import { NextResponse } from 'next/server'
 import OpenAI from 'openai'
 import { createServerSupabaseClient } from '@/lib/supabase-server'
 
-// Initialize OpenAI
-const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY,
-})
-
 // Runtime configuration for App Router
 export const runtime = 'nodejs'
 
@@ -117,6 +112,10 @@ Client Information:
 Please provide a comprehensive functional medicine analysis.`
 
   try {
+    const openai = new OpenAI({
+      apiKey: process.env.OPENAI_API_KEY,
+    })
+    
     const response = await openai.chat.completions.create({
       model: "gpt-4-turbo-preview",
       messages: [
