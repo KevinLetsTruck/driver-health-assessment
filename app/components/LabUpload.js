@@ -3,19 +3,21 @@
 import { useState } from 'react'
 import { Upload, FileText, Check, AlertCircle, Brain, Loader2 } from 'lucide-react'
 
-export default function LabUpload({ onUploadComplete }) {
+export default function LabUpload({ clientId, onUploadComplete }) {
   const [uploading, setUploading] = useState(false)
   const [analyzing, setAnalyzing] = useState(false)
   const [file, setFile] = useState(null)
   const [analysis, setAnalysis] = useState(null)
+  const [error, setError] = useState(null)
 
   const handleFileSelect = (e) => {
     const selectedFile = e.target.files[0]
     if (selectedFile && selectedFile.type === 'application/pdf') {
       setFile(selectedFile)
       setAnalysis(null)
+      setError(null)
     } else {
-      alert('Please select a PDF file')
+      setError('Please select a PDF file')
     }
   }
 
@@ -23,18 +25,32 @@ export default function LabUpload({ onUploadComplete }) {
     if (!file) return
 
     setUploading(true)
+    setError(null)
+    
     try {
-      // Simulate file upload
-      await new Promise(resolve => setTimeout(resolve, 2000))
+      // Create form data
+      const formData = new FormData()
+      formData.append('labFile', file)
+      formData.append('clientId', clientId)
+      formData.append('testType', 'Comprehensive Lab Panel')
+      formData.append('testDate', new Date().toISOString())
+      // Upload and analyze
+      const response = await fetch('/api/analyze-lab', {
+        method: 'POST',
+        body: formData
+      })
+      
+      const result = await response.json()
+      
+      if (!response.ok) {
+        throw new Error(result.error || 'Failed to analyze lab results')
+      }
       
       setUploading(false)
       setAnalyzing(true)
       
-      // Simulate AI analysis
-      await new Promise(resolve => setTimeout(resolve, 3000))
-      
-      // Mock AI analysis results
-      const mockAnalysis = {
+      // Process the AI analysis results
+      const analysisData = result.analysis || {
         summary: "Overall health markers show improvement with some areas needing attention.",
         keyFindings: [
           {
@@ -76,14 +92,18 @@ export default function LabUpload({ onUploadComplete }) {
         ]
       }
       
-      setAnalysis(mockAnalysis)
+      setAnalysis(analysisData)
       setAnalyzing(false)
       
       if (onUploadComplete) {
-        onUploadComplete(file, mockAnalysis)
+        onUploadComplete({
+          labResultId: result.labResultId,
+          analysis: analysisData
+        })
       }
     } catch (error) {
       console.error('Upload error:', error)
+      setError(error.message)
       setUploading(false)
       setAnalyzing(false)
     }
@@ -92,6 +112,17 @@ export default function LabUpload({ onUploadComplete }) {
   return (
     <div className="bg-white rounded-lg shadow p-6">
       <h2 className="text-xl font-semibold mb-4">Upload Lab Results</h2>
+      
+      {error && (
+        <div className="mb-4 p-4 bg-red-50 border border-red-200 rounded-md">
+          <div className="flex">
+            <AlertCircle className="h-5 w-5 text-red-400" />
+            <div className="ml-3">
+              <p className="text-sm text-red-600">{error}</p>
+            </div>
+          </div>
+        </div>
+      )}
       
       {!file ? (
         <div className="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center">
