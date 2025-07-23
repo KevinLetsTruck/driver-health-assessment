@@ -1,5 +1,8 @@
 -- Enhanced Driver Health Assessment Tables
 
+-- Enable UUID extension for better IDs
+CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
+
 -- Main driver assessments table (already exists, but let's enhance it)
 ALTER TABLE driver_assessments 
 ADD COLUMN IF NOT EXISTS headaches TEXT,
@@ -308,4 +311,54 @@ ALTER TABLE wearable_data ENABLE ROW LEVEL SECURITY;
 ALTER TABLE messages ENABLE ROW LEVEL SECURITY;
 ALTER TABLE group_sessions ENABLE ROW LEVEL SECURITY;
 ALTER TABLE supplements ENABLE ROW LEVEL SECURITY;
-ALTER TABLE notifications ENABLE ROW LEVEL SECURITY; 
+ALTER TABLE notifications ENABLE ROW LEVEL SECURITY;
+
+-- Create role enum for clients
+DO $$ BEGIN
+    CREATE TYPE client_role AS ENUM ('client', 'practitioner', 'admin');
+EXCEPTION
+    WHEN duplicate_object THEN null;
+END $$;
+
+-- Alter clients table to add role
+ALTER TABLE clients 
+ADD COLUMN IF NOT EXISTS role client_role DEFAULT 'client';
+
+-- Daily Journal Entries (for the new comprehensive journal)
+CREATE TABLE IF NOT EXISTS journal_entries (
+  id BIGSERIAL PRIMARY KEY,
+  client_id BIGINT REFERENCES clients(id),
+  date DATE NOT NULL,
+  meals JSONB,
+  water_intake INTEGER,
+  symptoms JSONB,
+  mood INTEGER,
+  energy_level INTEGER,
+  stress_level INTEGER,
+  sleep_hours DECIMAL,
+  sleep_quality INTEGER,
+  exercise_minutes INTEGER,
+  exercise_type TEXT,
+  bowel_movements INTEGER,
+  notes TEXT,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+  updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+CREATE INDEX IF NOT EXISTS idx_journal_client_date ON journal_entries(client_id, date);
+
+-- RLS Policies for authentication
+CREATE POLICY "Users can view own client profile" ON clients
+    FOR SELECT USING (auth.uid()::text = email);
+
+CREATE POLICY "Users can update own client profile" ON clients
+    FOR UPDATE USING (auth.uid()::text = email);
+
+CREATE POLICY "Practitioners can view all clients" ON clients
+    FOR SELECT USING (
+        EXISTS (
+            SELECT 1 FROM clients 
+            WHERE email = auth.uid()::text 
+            AND role = 'practitioner'
+        )
+    ); 
