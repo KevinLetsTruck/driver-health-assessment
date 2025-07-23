@@ -9,7 +9,7 @@ import {
   AlertCircle,
   MessageSquare,
   Video,
-  ChartBar,
+  BarChart3,
   Upload,
   Search,
   Filter,
@@ -124,7 +124,7 @@ export default function PractitionerDashboard() {
                       <Filter className="h-5 w-5" />
                     </button>
                     <button className="p-2 text-gray-400 hover:text-gray-600">
-                      <ChartBar className="h-5 w-5" />
+                      <BarChart3 className="h-5 w-5" />
                     </button>
                   </div>
                 </div>
