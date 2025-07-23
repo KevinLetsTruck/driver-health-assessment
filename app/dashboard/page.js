@@ -15,6 +15,7 @@ import {
   Clock,
   BarChart
 } from 'lucide-react'
+import DailyJournal from '../components/DailyJournal'
 
 export default function ClientDashboard() {
   const [activeTab, setActiveTab] = useState('overview')
@@ -184,59 +185,7 @@ export default function ClientDashboard() {
 
           {/* Daily Journal Tab */}
           {activeTab === 'journal' && (
-            <div>
-              <h2 className="text-xl font-semibold mb-4">Daily Health Journal</h2>
-              <form className="space-y-6">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Energy Level (1-10)
-                    </label>
-                    <input 
-                      type="range" 
-                      min="1" 
-                      max="10" 
-                      className="w-full"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Sleep Quality (1-10)
-                    </label>
-                    <input 
-                      type="range" 
-                      min="1" 
-                      max="10" 
-                      className="w-full"
-                    />
-                  </div>
-                </div>
-                
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Today's Meals
-                  </label>
-                  <textarea 
-                    className="w-full p-3 border border-gray-300 rounded-lg"
-                    rows="4"
-                    placeholder="Describe what you ate today..."
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Symptoms & Notes
-                  </label>
-                  <textarea 
-                    className="w-full p-3 border border-gray-300 rounded-lg"
-                    rows="4"
-                    placeholder="Any symptoms or notes about how you're feeling..."
-                  />
-                </div>
-
-                <button className="btn-primary">Save Journal Entry</button>
-              </form>
-            </div>
+            <DailyJournal />
           )}
 
           {/* Lab Results Tab */}
