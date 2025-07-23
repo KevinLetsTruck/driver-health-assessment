@@ -7,7 +7,11 @@ export const metadata = {
   title: 'Driver Health Assessment | Kevin Rutherford, FNTP',
   description: 'Comprehensive health evaluation for professional drivers - Functional Medicine approach',
   keywords: 'truck driver health, functional medicine, FNTP, driver wellness',
-  viewport: 'width=device-width, initial-scale=1',
+}
+
+export const viewport = {
+  width: 'device-width',
+  initialScale: 1,
 }
 
 export default function RootLayout({ children }) {

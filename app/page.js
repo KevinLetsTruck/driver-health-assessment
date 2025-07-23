@@ -53,11 +53,39 @@ export default function DriverHealthAssessment() {
       description: 'Health status and concerns'
     },
     {
+      id: 'symptoms',
+      title: 'Symptom Review',
+      icon: FileText,
+      required: true,
+      description: 'Comprehensive symptom checklist'
+    },
+    {
+      id: 'family',
+      title: 'Family History',
+      icon: User,
+      required: true,
+      description: 'Family health patterns'
+    },
+    {
       id: 'lifestyle',
       title: 'Lifestyle Factors',
       icon: Brain,
       required: true,
       description: 'Sleep, stress, and daily habits'
+    },
+    {
+      id: 'diet',
+      title: 'Diet & Nutrition',
+      icon: Activity,
+      required: true,
+      description: 'Eating patterns and food sensitivities'
+    },
+    {
+      id: 'environment',
+      title: 'Environmental Factors',
+      icon: AlertTriangle,
+      required: true,
+      description: 'Exposures and toxins'
     },
     {
       id: 'goals',
@@ -156,9 +184,22 @@ export default function DriverHealthAssessment() {
         if (!formData.overallHealth) errors.overallHealth = 'Health rating is required'
         if (!formData.energyLevel) errors.energyLevel = 'Energy level is required'
         break
+      case 'symptoms':
+        // Optional section - no required fields
+        break
+      case 'family':
+        // Optional section - no required fields
+        break
       case 'lifestyle':
         if (!formData.sleepQuality) errors.sleepQuality = 'Sleep quality is required'
         if (!formData.stressLevel) errors.stressLevel = 'Stress level is required'
+        break
+      case 'diet':
+        if (!formData.primaryDiet) errors.primaryDiet = 'Primary diet is required'
+        if (!formData.waterIntake) errors.waterIntake = 'Water intake is required'
+        break
+      case 'environment':
+        // Optional section - no required fields
         break
       case 'goals':
         if (!formData.primaryGoal) errors.primaryGoal = 'Primary goal is required'
@@ -571,6 +612,310 @@ export default function DriverHealthAssessment() {
             </>
           )}
 
+          {currentSection.id === 'symptoms' && (
+            <>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Headaches</label>
+                  <select
+                    value={formData.headaches || ''}
+                    onChange={(e) => updateFormData('headaches', e.target.value)}
+                    className="input-field"
+                  >
+                    <option value="">Select frequency</option>
+                    <option value="daily">Daily</option>
+                    <option value="few-times-week">Few times per week</option>
+                    <option value="weekly">Weekly</option>
+                    <option value="monthly">Monthly</option>
+                    <option value="rarely">Rarely</option>
+                    <option value="never">Never</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Fatigue</label>
+                  <select
+                    value={formData.fatigue || ''}
+                    onChange={(e) => updateFormData('fatigue', e.target.value)}
+                    className="input-field"
+                  >
+                    <option value="">Select frequency</option>
+                    <option value="daily">Daily</option>
+                    <option value="few-times-week">Few times per week</option>
+                    <option value="weekly">Weekly</option>
+                    <option value="monthly">Monthly</option>
+                    <option value="rarely">Rarely</option>
+                    <option value="never">Never</option>
+                  </select>
+                </div>
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Joint Pain</label>
+                  <select
+                    value={formData.jointPain || ''}
+                    onChange={(e) => updateFormData('jointPain', e.target.value)}
+                    className="input-field"
+                  >
+                    <option value="">Select frequency</option>
+                    <option value="daily">Daily</option>
+                    <option value="few-times-week">Few times per week</option>
+                    <option value="weekly">Weekly</option>
+                    <option value="monthly">Monthly</option>
+                    <option value="rarely">Rarely</option>
+                    <option value="never">Never</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Nausea/Vomiting</label>
+                  <select
+                    value={formData.nauseaVomiting || ''}
+                    onChange={(e) => updateFormData('nauseaVomiting', e.target.value)}
+                    className="input-field"
+                  >
+                    <option value="">Select frequency</option>
+                    <option value="daily">Daily</option>
+                    <option value="few-times-week">Few times per week</option>
+                    <option value="weekly">Weekly</option>
+                    <option value="monthly">Monthly</option>
+                    <option value="rarely">Rarely</option>
+                    <option value="never">Never</option>
+                  </select>
+                </div>
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Diarrhea</label>
+                  <select
+                    value={formData.diarrhea || ''}
+                    onChange={(e) => updateFormData('diarrhea', e.target.value)}
+                    className="input-field"
+                  >
+                    <option value="">Select frequency</option>
+                    <option value="daily">Daily</option>
+                    <option value="few-times-week">Few times per week</option>
+                    <option value="weekly">Weekly</option>
+                    <option value="monthly">Monthly</option>
+                    <option value="rarely">Rarely</option>
+                    <option value="never">Never</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Constipation</label>
+                  <select
+                    value={formData.constipation || ''}
+                    onChange={(e) => updateFormData('constipation', e.target.value)}
+                    className="input-field"
+                  >
+                    <option value="">Select frequency</option>
+                    <option value="daily">Daily</option>
+                    <option value="few-times-week">Few times per week</option>
+                    <option value="weekly">Weekly</option>
+                    <option value="monthly">Monthly</option>
+                    <option value="rarely">Rarely</option>
+                    <option value="never">Never</option>
+                  </select>
+                </div>
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Cough</label>
+                  <select
+                    value={formData.cough || ''}
+                    onChange={(e) => updateFormData('cough', e.target.value)}
+                    className="input-field"
+                  >
+                    <option value="">Select frequency</option>
+                    <option value="daily">Daily</option>
+                    <option value="few-times-week">Few times per week</option>
+                    <option value="weekly">Weekly</option>
+                    <option value="monthly">Monthly</option>
+                    <option value="rarely">Rarely</option>
+                    <option value="never">Never</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Sore Throat</label>
+                  <select
+                    value={formData.soreThroat || ''}
+                    onChange={(e) => updateFormData('soreThroat', e.target.value)}
+                    className="input-field"
+                  >
+                    <option value="">Select frequency</option>
+                    <option value="daily">Daily</option>
+                    <option value="few-times-week">Few times per week</option>
+                    <option value="weekly">Weekly</option>
+                    <option value="monthly">Monthly</option>
+                    <option value="rarely">Rarely</option>
+                    <option value="never">Never</option>
+                  </select>
+                </div>
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Runny Nose</label>
+                  <select
+                    value={formData.runnyNose || ''}
+                    onChange={(e) => updateFormData('runnyNose', e.target.value)}
+                    className="input-field"
+                  >
+                    <option value="">Select frequency</option>
+                    <option value="daily">Daily</option>
+                    <option value="few-times-week">Few times per week</option>
+                    <option value="weekly">Weekly</option>
+                    <option value="monthly">Monthly</option>
+                    <option value="rarely">Rarely</option>
+                    <option value="never">Never</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Sinus Pressure</label>
+                  <select
+                    value={formData.sinusPressure || ''}
+                    onChange={(e) => updateFormData('sinusPressure', e.target.value)}
+                    className="input-field"
+                  >
+                    <option value="">Select frequency</option>
+                    <option value="daily">Daily</option>
+                    <option value="few-times-week">Few times per week</option>
+                    <option value="weekly">Weekly</option>
+                    <option value="monthly">Monthly</option>
+                    <option value="rarely">Rarely</option>
+                    <option value="never">Never</option>
+                  </select>
+                </div>
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Itching/Rashes</label>
+                  <select
+                    value={formData.itchingRashes || ''}
+                    onChange={(e) => updateFormData('itchingRashes', e.target.value)}
+                    className="input-field"
+                  >
+                    <option value="">Select frequency</option>
+                    <option value="daily">Daily</option>
+                    <option value="few-times-week">Few times per week</option>
+                    <option value="weekly">Weekly</option>
+                    <option value="monthly">Monthly</option>
+                    <option value="rarely">Rarely</option>
+                    <option value="never">Never</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Other Symptoms</label>
+                  <textarea
+                    value={formData.otherSymptoms || ''}
+                    onChange={(e) => updateFormData('otherSymptoms', e.target.value)}
+                    className="input-field"
+                    rows="3"
+                    placeholder="Describe any other symptoms you're experiencing..."
+                  />
+                </div>
+              </div>
+            </>
+          )}
+
+          {currentSection.id === 'family' && (
+            <>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Mother's Health</label>
+                  <select
+                    value={formData.mothersHealth || ''}
+                    onChange={(e) => updateFormData('mothersHealth', e.target.value)}
+                    className="input-field"
+                  >
+                    <option value="">Select health status</option>
+                    <option value="excellent">Excellent</option>
+                    <option value="very-good">Very Good</option>
+                    <option value="good">Good</option>
+                    <option value="fair">Fair</option>
+                    <option value="poor">Poor</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Father's Health</label>
+                  <select
+                    value={formData.fathersHealth || ''}
+                    onChange={(e) => updateFormData('fathersHealth', e.target.value)}
+                    className="input-field"
+                  >
+                    <option value="">Select health status</option>
+                    <option value="excellent">Excellent</option>
+                    <option value="very-good">Very Good</option>
+                    <option value="good">Good</option>
+                    <option value="fair">Fair</option>
+                    <option value="poor">Poor</option>
+                  </select>
+                </div>
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Siblings Health</label>
+                  <select
+                    value={formData.siblingsHealth || ''}
+                    onChange={(e) => updateFormData('siblingsHealth', e.target.value)}
+                    className="input-field"
+                  >
+                    <option value="">Select health status</option>
+                    <option value="excellent">Excellent</option>
+                    <option value="very-good">Very Good</option>
+                    <option value="good">Good</option>
+                    <option value="fair">Fair</option>
+                    <option value="poor">Poor</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Children's Health</label>
+                  <select
+                    value={formData.childrensHealth || ''}
+                    onChange={(e) => updateFormData('childrensHealth', e.target.value)}
+                    className="input-field"
+                  >
+                    <option value="">Select health status</option>
+                    <option value="excellent">Excellent</option>
+                    <option value="very-good">Very Good</option>
+                    <option value="good">Good</option>
+                    <option value="fair">Fair</option>
+                    <option value="poor">Poor</option>
+                  </select>
+                </div>
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Grandparents Health</label>
+                  <select
+                    value={formData.grandparentsHealth || ''}
+                    onChange={(e) => updateFormData('grandparentsHealth', e.target.value)}
+                    className="input-field"
+                  >
+                    <option value="">Select health status</option>
+                    <option value="excellent">Excellent</option>
+                    <option value="very-good">Very Good</option>
+                    <option value="good">Good</option>
+                    <option value="fair">Fair</option>
+                    <option value="poor">Poor</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Aunts/Uncles Health</label>
+                  <select
+                    value={formData.auntsUnclesHealth || ''}
+                    onChange={(e) => updateFormData('auntsUnclesHealth', e.target.value)}
+                    className="input-field"
+                  >
+                    <option value="">Select health status</option>
+                    <option value="excellent">Excellent</option>
+                    <option value="very-good">Very Good</option>
+                    <option value="good">Good</option>
+                    <option value="fair">Fair</option>
+                    <option value="poor">Poor</option>
+                  </select>
+                </div>
+              </div>
+            </>
+          )}
+
           {currentSection.id === 'lifestyle' && (
             <>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -639,6 +984,201 @@ export default function DriverHealthAssessment() {
                     max="12"
                     step="0.5"
                   />
+                </div>
+              </div>
+            </>
+          )}
+
+          {currentSection.id === 'diet' && (
+            <>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Primary Diet</label>
+                  <select
+                    value={formData.primaryDiet || ''}
+                    onChange={(e) => updateFormData('primaryDiet', e.target.value)}
+                    className="input-field"
+                  >
+                    <option value="">Select primary diet</option>
+                    <option value="vegetarian">Vegetarian</option>
+                    <option value="vegan">Vegan</option>
+                    <option value="pescatarian">Pescatarian</option>
+                    <option value="omnivore">Omnivore</option>
+                    <option value="keto">Keto</option>
+                    <option value="paleo">Paleo</option>
+                    <option value="other">Other</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Food Sensitivities</label>
+                  <textarea
+                    value={formData.foodSensitivities || ''}
+                    onChange={(e) => updateFormData('foodSensitivities', e.target.value)}
+                    className="input-field"
+                    rows="3"
+                    placeholder="List any food sensitivities or allergies..."
+                  />
+                </div>
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Meal Frequency</label>
+                  <select
+                    value={formData.mealFrequency || ''}
+                    onChange={(e) => updateFormData('mealFrequency', e.target.value)}
+                    className="input-field"
+                  >
+                    <option value="">Select meal frequency</option>
+                    <option value="3-meals">3 meals per day</option>
+                    <option value="4-meals">4 meals per day</option>
+                    <option value="5-meals">5 meals per day</option>
+                    <option value="6-meals">6 meals per day</option>
+                    <option value="7-meals">7 meals per day</option>
+                    <option value="8-meals">8 meals per day</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Snack Frequency</label>
+                  <select
+                    value={formData.snackFrequency || ''}
+                    onChange={(e) => updateFormData('snackFrequency', e.target.value)}
+                    className="input-field"
+                  >
+                    <option value="">Select snack frequency</option>
+                    <option value="3-snacks">3 snacks per day</option>
+                    <option value="4-snacks">4 snacks per day</option>
+                    <option value="5-snacks">5 snacks per day</option>
+                    <option value="6-snacks">6 snacks per day</option>
+                    <option value="7-snacks">7 snacks per day</option>
+                    <option value="8-snacks">8 snacks per day</option>
+                  </select>
+                </div>
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Water Intake (L/day)</label>
+                  <input
+                    type="number"
+                    value={formData.waterIntake || ''}
+                    onChange={(e) => updateFormData('waterIntake', e.target.value)}
+                    className="input-field"
+                    placeholder="e.g., 2.5"
+                    min="0"
+                    step="0.5"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Caffeine Intake (cups/day)</label>
+                  <input
+                    type="number"
+                    value={formData.caffeineIntake || ''}
+                    onChange={(e) => updateFormData('caffeineIntake', e.target.value)}
+                    className="input-field"
+                    placeholder="e.g., 2"
+                    min="0"
+                    step="1"
+                  />
+                </div>
+              </div>
+            </>
+          )}
+
+          {currentSection.id === 'environment' && (
+            <>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Exposure to Tobacco Smoke</label>
+                  <select
+                    value={formData.tobaccoSmoke || ''}
+                    onChange={(e) => updateFormData('tobaccoSmoke', e.target.value)}
+                    className="input-field"
+                  >
+                    <option value="">Select exposure</option>
+                    <option value="never">Never</option>
+                    <option value="occasional">Occasional (e.g., occasional social smoking)</option>
+                    <option value="daily">Daily</option>
+                    <option value="rarely">Rarely</option>
+                    <option value="never">Never</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Exposure to Air Pollution</label>
+                  <select
+                    value={formData.airPollution || ''}
+                    onChange={(e) => updateFormData('airPollution', e.target.value)}
+                    className="input-field"
+                  >
+                    <option value="">Select exposure</option>
+                    <option value="never">Never</option>
+                    <option value="occasional">Occasional (e.g., occasional exposure)</option>
+                    <option value="daily">Daily</option>
+                    <option value="rarely">Rarely</option>
+                    <option value="never">Never</option>
+                  </select>
+                </div>
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Exposure to Pesticides/Herbicides</label>
+                  <select
+                    value={formData.pesticidesHerbicides || ''}
+                    onChange={(e) => updateFormData('pesticidesHerbicides', e.target.value)}
+                    className="input-field"
+                  >
+                    <option value="">Select exposure</option>
+                    <option value="never">Never</option>
+                    <option value="occasional">Occasional (e.g., occasional exposure)</option>
+                    <option value="daily">Daily</option>
+                    <option value="rarely">Rarely</option>
+                    <option value="never">Never</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Exposure to Mold/Mildew</label>
+                  <select
+                    value={formData.moldMildew || ''}
+                    onChange={(e) => updateFormData('moldMildew', e.target.value)}
+                    className="input-field"
+                  >
+                    <option value="">Select exposure</option>
+                    <option value="never">Never</option>
+                    <option value="occasional">Occasional (e.g., occasional exposure)</option>
+                    <option value="daily">Daily</option>
+                    <option value="rarely">Rarely</option>
+                    <option value="never">Never</option>
+                  </select>
+                </div>
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Exposure to Chemicals/Toxins</label>
+                  <select
+                    value={formData.chemicalsToxins || ''}
+                    onChange={(e) => updateFormData('chemicalsToxins', e.target.value)}
+                    className="input-field"
+                  >
+                    <option value="">Select exposure</option>
+                    <option value="never">Never</option>
+                    <option value="occasional">Occasional (e.g., occasional exposure)</option>
+                    <option value="daily">Daily</option>
+                    <option value="rarely">Rarely</option>
+                    <option value="never">Never</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Exposure to Radiation</label>
+                  <select
+                    value={formData.radiation || ''}
+                    onChange={(e) => updateFormData('radiation', e.target.value)}
+                    className="input-field"
+                  >
+                    <option value="">Select exposure</option>
+                    <option value="never">Never</option>
+                    <option value="occasional">Occasional (e.g., occasional exposure)</option>
+                    <option value="daily">Daily</option>
+                    <option value="rarely">Rarely</option>
+                    <option value="never">Never</option>
+                  </select>
                 </div>
               </div>
             </>

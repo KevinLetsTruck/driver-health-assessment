@@ -3,13 +3,15 @@ import { Resend } from 'resend';
 import { NextResponse } from 'next/server';
 
 // Initialize Supabase client
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL,
-  process.env.SUPABASE_SERVICE_ROLE_KEY
-);
+const supabase = process.env.NEXT_PUBLIC_SUPABASE_URL && process.env.SUPABASE_SERVICE_ROLE_KEY
+  ? createClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL,
+      process.env.SUPABASE_SERVICE_ROLE_KEY
+    )
+  : null;
 
 // Initialize Resend
-const resend = new Resend(process.env.RESEND_API_KEY);
+const resend = process.env.RESEND_API_KEY ? new Resend(process.env.RESEND_API_KEY) : null;
 
 export async function POST(request) {
   try {
@@ -17,7 +19,7 @@ export async function POST(request) {
     console.log('Received form data:', formData);
     
     // Validate required fields
-    if (!formData.driverProfile?.name || !formData.driverProfile?.email) {
+    if (!formData.fullName || !formData.email) {
       return NextResponse.json(
         { error: 'Driver name and email are required' },
         { status: 400 }
@@ -27,40 +29,33 @@ export async function POST(request) {
     // Prepare data for database insertion
     const assessmentData = {
       // Driver Profile
-      driver_name: formData.driverProfile.name,
-      age: parseInt(formData.driverProfile.age) || null,
-      email: formData.driverProfile.email,
-      phone: formData.driverProfile.phone || null,
-      years_driving: parseInt(formData.driverProfile.experience) || null,
-      route_type: formData.driverProfile.routeType || null,
+      driver_name: formData.fullName,
+      age: parseInt(formData.age) || null,
+      email: formData.email,
+      phone: formData.phone || null,
+      years_driving: formData.yearsDriving || null,
+      route_type: formData.routeType || null,
       
       // Equipment & Setup
-      truck_type: formData.equipmentSetup?.truckType || null,
-      has_sleeper: formData.equipmentSetup?.hasSleeper || null,
-      equipment_available: formData.equipmentSetup?.availableEquipment || [],
-      workspace_comfort_rating: parseInt(formData.equipmentSetup?.workspaceComfort) || null,
-      
+      truck_type: formData.truckType || null,
+      sleeper_size: formData.sleeperSize || null,
+      equipment_available: Array.isArray(formData.equipment) ? formData.equipment : [],
       // Current Health
-      health_rating: parseInt(formData.currentHealth?.overallHealth) || null,
-      energy_level: parseInt(formData.currentHealth?.energyLevel) || null,
-      health_concerns: formData.currentHealth?.healthConcerns || [],
-      current_medications: formData.currentHealth?.medications || null,
-      recent_health_changes: formData.currentHealth?.recentChanges || null,
+      health_rating: formData.overallHealth || null,
+      energy_level: formData.energyLevel || null,
+      health_concerns: formData.healthConcerns || null,
+      current_medications: formData.medications || null,
       
       // Lifestyle Factors
-      sleep_quality: parseInt(formData.lifestyleFactors?.sleepQuality) || null,
-      average_sleep_hours: parseFloat(formData.lifestyleFactors?.sleepHours) || null,
-      stress_level: parseInt(formData.lifestyleFactors?.stressLevel) || null,
-      exercise_frequency: formData.lifestyleFactors?.exerciseFrequency || null,
-      diet_quality: parseInt(formData.lifestyleFactors?.dietQuality) || null,
-      hydration_level: parseInt(formData.lifestyleFactors?.hydrationLevel) || null,
+      sleep_quality: parseInt(formData.sleepQuality) || null,
+      average_sleep_hours: parseFloat(formData.sleepHours) || null,
+      stress_level: parseInt(formData.stressLevel) || null,
+      exercise_frequency: formData.exerciseFreq || null,
       
       // Health Goals
-      primary_goals: formData.healthGoals?.primaryGoals || [],
-      commitment_level: parseInt(formData.healthGoals?.commitmentLevel) || null,
-      biggest_challenges: formData.healthGoals?.challenges || null,
-      previous_attempts: formData.healthGoals?.previousAttempts || null,
-      support_system: formData.healthGoals?.supportSystem || null,
+      primary_goals: formData.primaryGoal || null,
+      commitment_level: formData.commitmentLevel || null,
+      additional_goals: formData.additionalGoals || null,
       
       // Store complete form data as backup
       assessment_data: formData,
@@ -70,48 +65,62 @@ export async function POST(request) {
     console.log('Prepared assessment data:', assessmentData);
 
     // Insert data into Supabase
-    const { data, error: dbError } = await supabase
-      .from('driver_assessments')
-      .insert([assessmentData])
-      .select('id')
-      .single();
+    let data = null;
+    if (supabase) {
+      const { data: dbData, error: dbError } = await supabase
+        .from('driver_assessments')
+        .insert([assessmentData])
+        .select('id')
+        .single();
 
-    if (dbError) {
-      console.error('Database error:', dbError);
-      return NextResponse.json(
-        { error: 'Failed to save assessment data', details: dbError.message },
-        { status: 500 }
-      );
+      if (dbError) {
+        console.error('Database error:', dbError);
+        return NextResponse.json(
+          { error: 'Failed to save assessment data', details: dbError.message },
+          { status: 500 }
+        );
+      }
+      data = dbData;
+      console.log('Data saved successfully:', data);
+    } else {
+      console.log('Supabase not configured, skipping database save');
+      data = { id: 'demo-' + Date.now() };
     }
 
-    console.log('Data saved successfully:', data);
-
     // Send notification email to Kevin
-    try {
-      await resend.emails.send({
-        from: 'Driver Health Assessment <noreply@letstruck.com>',
-        to: [process.env.NOTIFICATION_EMAIL],
-        subject: `New Health Assessment - ${formData.driverProfile.name}`,
-        html: createNotificationEmail(formData, data.id),
-      });
-      console.log('Notification email sent successfully');
-    } catch (emailError) {
-      console.error('Email notification error:', emailError);
-      // Don't fail the request if email fails
+    if (resend && process.env.NOTIFICATION_EMAIL) {
+      try {
+        await resend.emails.send({
+          from: 'Driver Health Assessment <noreply@letstruck.com>',
+          to: [process.env.NOTIFICATION_EMAIL],
+          subject: `New Health Assessment - ${formData.fullName}`,
+          html: createNotificationEmail(formData, data.id),
+        });
+        console.log('Notification email sent successfully');
+      } catch (emailError) {
+        console.error('Email notification error:', emailError);
+        // Don't fail the request if email fails
+      }
+    } else {
+      console.log('Resend not configured, skipping email notifications');
     }
 
     // Send confirmation email to driver
-    try {
-      await resend.emails.send({
-        from: 'Kevin Rutherford, FNTP <noreply@letstruck.com>',
-        to: [formData.driverProfile.email],
-        subject: 'Health Assessment Received - Next Steps',
-        html: createConfirmationEmail(formData.driverProfile.name),
-      });
-      console.log('Confirmation email sent successfully');
-    } catch (emailError) {
-      console.error('Confirmation email error:', emailError);
-      // Don't fail the request if email fails
+    if (resend) {
+      try {
+        await resend.emails.send({
+          from: 'Kevin Rutherford, FNTP <noreply@letstruck.com>',
+          to: [formData.email],
+          subject: 'Health Assessment Received - Next Steps',
+          html: createConfirmationEmail(formData.fullName),
+        });
+        console.log('Confirmation email sent successfully');
+      } catch (emailError) {
+        console.error('Confirmation email error:', emailError);
+        // Don't fail the request if email fails
+      }
+    } else {
+      console.log('Resend not configured, skipping confirmation email');
     }
 
     return NextResponse.json({
@@ -131,9 +140,9 @@ export async function POST(request) {
 
 // Email template for Kevin (notification)
 function createNotificationEmail(formData, assessmentId) {
-  const profile = formData.driverProfile || {};
-  const health = formData.currentHealth || {};
-  const goals = formData.healthGoals || {};
+  const profile = formData;
+  const health = formData;
+  const goals = formData;
   
   return `
     <!DOCTYPE html>
@@ -162,33 +171,27 @@ function createNotificationEmail(formData, assessmentId) {
       <div class="content">
         <div class="section priority">
           <h3>📋 Driver Profile</h3>
-          <p><strong>Name:</strong> ${profile.name || 'Not provided'}</p>
+          <p><strong>Name:</strong> ${profile.fullName || 'Not provided'}</p>
           <p><strong>Email:</strong> ${profile.email || 'Not provided'}</p>
           <p><strong>Phone:</strong> ${profile.phone || 'Not provided'}</p>
           <p><strong>Age:</strong> ${profile.age || 'Not provided'}</p>
-          <p><strong>Years Driving:</strong> ${profile.experience || 'Not provided'}</p>
+          <p><strong>Years Driving:</strong> ${profile.yearsDriving || 'Not provided'}</p>
           <p><strong>Route Type:</strong> ${profile.routeType || 'Not provided'}</p>
         </div>
 
         <div class="section">
           <h3>🏥 Current Health Status</h3>
-          <p><strong>Overall Health Rating:</strong> ${health.overallHealth || 'Not rated'}/10</p>
-          <p><strong>Energy Level:</strong> ${health.energyLevel || 'Not rated'}/10</p>
-          ${health.healthConcerns && health.healthConcerns.length > 0 ? `
-            <p><strong>Health Concerns:</strong></p>
-            <ul>${health.healthConcerns.map(concern => `<li>${concern}</li>`).join('')}</ul>
-          ` : ''}
+          <p><strong>Overall Health Rating:</strong> ${health.overallHealth || 'Not rated'}</p>
+          <p><strong>Energy Level:</strong> ${health.energyLevel || 'Not rated'}</p>
+          ${health.healthConcerns ? `<p><strong>Health Concerns:</strong> ${health.healthConcerns}</p>` : ''}
           ${health.medications ? `<p><strong>Current Medications:</strong> ${health.medications}</p>` : ''}
         </div>
 
         <div class="section">
           <h3>🎯 Health Goals</h3>
-          ${goals.primaryGoals && goals.primaryGoals.length > 0 ? `
-            <p><strong>Primary Goals:</strong></p>
-            <ul>${goals.primaryGoals.map(goal => `<li>${goal}</li>`).join('')}</ul>
-          ` : ''}
-          <p><strong>Commitment Level:</strong> ${goals.commitmentLevel || 'Not rated'}/10</p>
-          ${goals.challenges ? `<p><strong>Biggest Challenges:</strong> ${goals.challenges}</p>` : ''}
+          <p><strong>Primary Goal:</strong> ${goals.primaryGoal || 'Not specified'}</p>
+          <p><strong>Commitment Level:</strong> ${goals.commitmentLevel || 'Not rated'}</p>
+          ${goals.additionalGoals ? `<p><strong>Additional Goals:</strong> ${goals.additionalGoals}</p>` : ''}
         </div>
       </div>
 
