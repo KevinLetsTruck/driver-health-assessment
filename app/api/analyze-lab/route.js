@@ -1,7 +1,5 @@
 import { NextResponse } from 'next/server'
 import OpenAI from 'openai'
-import formidable from 'formidable'
-import fs from 'fs'
 import pdf from 'pdf-parse'
 import { createServerSupabaseClient } from '@/lib/supabase-server'
 
@@ -10,12 +8,8 @@ const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
 })
 
-// Configure formidable for file parsing
-export const config = {
-  api: {
-    bodyParser: false,
-  },
-}
+// Runtime configuration for App Router
+export const runtime = 'nodejs'
 
 // Lab reference ranges for common tests
 const labReferenceRanges = {
@@ -150,14 +144,13 @@ export async function POST(request) {
       )
     }
 
-    // Parse the form data
-    const form = formidable({})
-    const [fields, files] = await form.parse(request)
+    // Get the form data
+    const formData = await request.formData()
     
-    const file = files.labFile?.[0]
-    const clientId = fields.clientId?.[0]
-    const testType = fields.testType?.[0] || 'Comprehensive Metabolic Panel'
-    const testDate = fields.testDate?.[0] || new Date().toISOString()
+    const file = formData.get('labFile')
+    const clientId = formData.get('clientId')
+    const testType = formData.get('testType') || 'Comprehensive Metabolic Panel'
+    const testDate = formData.get('testDate') || new Date().toISOString()
 
     if (!file) {
       return NextResponse.json(
@@ -167,7 +160,8 @@ export async function POST(request) {
     }
 
     // Read and parse the PDF
-    const buffer = await fs.promises.readFile(file.filepath)
+    const bytes = await file.arrayBuffer()
+    const buffer = Buffer.from(bytes)
     const labText = await parseLabPDF(buffer)
 
     // Get client information from Supabase
@@ -214,9 +208,6 @@ export async function POST(request) {
         { status: 500 }
       )
     }
-
-    // Clean up temp file
-    await fs.promises.unlink(file.filepath)
 
     return NextResponse.json({
       success: true,
